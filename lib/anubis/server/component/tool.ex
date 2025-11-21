@@ -10,15 +10,15 @@ defmodule Anubis.Server.Component.Tool do
 
       defmodule MyServer.Tools.Calculator do
         @behaviour Anubis.Server.Behaviour.Tool
-        
+
         alias Anubis.Server.Frame
-        
+
         @impl true
         def name, do: "calculator"
-        
+
         @impl true
         def description, do: "Performs basic arithmetic operations"
-        
+
         @impl true
         def input_schema do
           %{
@@ -34,20 +34,20 @@ defmodule Anubis.Server.Component.Tool do
             "required" => ["operation", "a", "b"]
           }
         end
-        
+
         @impl true
         def execute(%{"operation" => "add", "a" => a, "b" => b}, frame) do
           result = a + b
-          
+
           # Can access frame assigns
           user_id = frame.assigns[:user_id]
-          
+
           # Can return updated frame if needed
           new_frame = Frame.assign(frame, :last_calculation, result)
-          
+
           {:ok, result, new_frame}
         end
-        
+
         @impl true
         def execute(%{"operation" => "divide", "a" => a, "b" => 0}, _frame) do
           {:error, "Cannot divide by zero"}
@@ -178,10 +178,10 @@ defmodule Anubis.Server.Component.Tool do
         # Access assigns
         user_id = frame.assigns[:user_id]
         permissions = frame.assigns[:permissions]
-        
+
         # Update frame if needed
         new_frame = Frame.assign(frame, :last_tool_call, DateTime.utc_now())
-        
+
         {:ok, "Result", new_frame}
       end
   """
@@ -204,6 +204,7 @@ defmodule Anubis.Server.Component.Tool do
       |> then(&if t = tool.title, do: Map.put(&1, "title", t), else: &1)
       |> then(&if os = tool.output_schema, do: Map.put(&1, "outputSchema", os), else: &1)
       |> then(&if a = tool.annotations, do: Map.put(&1, "annotations", a), else: &1)
+      |> then(&if a = tool.annotations, do: Map.put(&1, "_meta", a), else: &1)
       |> JSON.encode!()
     end
   end
